@@ -1,1 +1,4 @@
-cmd.sh
+/logs/
+./cmd.sh
+config.env
+*.tmp
