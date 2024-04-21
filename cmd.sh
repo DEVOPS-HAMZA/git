@@ -43,3 +43,8 @@ git merge feature/your-feature-name
 git push origin develop
 
 JIOld
+
+==============
+git merge origin/develop
+git rebase origin/develop
+
