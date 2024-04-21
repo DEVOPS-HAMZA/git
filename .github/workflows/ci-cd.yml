@@ -1,6 +1,7 @@
 name: CI/CD Pipeline
 
 on:
+  create:  # Triggered when a branch or tag is created
   push:
     branches:
       - '*'
@@ -11,7 +12,7 @@ on:
     branches:
       - develop
       - master
-      - release/**
+      - 'release/**'
   workflow_dispatch:
     inputs:
       environment:
