@@ -22,6 +22,10 @@ git checkout -b feature/FA-40-unknown-activity-display-transactions-logic
 git push -u origin feature/FA-40-unknown-activity-display-transactions-logic
 
 git branch --show-current
+===========
+git checkout develop
+git pull origin develop
+git merge feature/FA-81-Create-custom-component-search
 
 
 
