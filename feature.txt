@@ -1,0 +1,84 @@
+name: CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - '**'
+      - '!master'
+      - '!release/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js (example for linting and testing)
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: echo "npm install (Replace with actual command)"
+
+      - name: Lint
+        run: echo "npm run lint (Replace with actual command)"
+
+      - name: Test
+        run: echo "npm test (Replace with actual command)"
+
+  deploy-develop:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Docker image
+        run: echo "Build Docker image for develop (Replace with actual command)"
+
+      - name: Push to ECR
+        run: echo "Push Docker image to ECR for develop (Replace with actual command)"
+
+      - name: Deploy to Kubernetes cluster
+        run: echo "Deploy to Kubernetes cluster in develop namespace (Replace with actual command)"
+
+  deploy-preprod:
+    needs: build-and-test
+    if: startsWith(github.ref, 'refs/heads/release/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Extract tag from branch name
+        id: extract_tag
+        run: echo "::set-output name=tag::${GITHUB_REF#refs/heads/release/}"
+
+      - name: Build Docker image with tag
+        run: echo "Build Docker image for preprod with extracted tag (Replace with actual command)"
+
+      - name: Push to ECR
+        run: echo "Push Docker image to ECR for preprod with extracted tag (Replace with actual command)"
+
+      - name: Deploy to Kubernetes cluster
+        run: echo "Deploy to Kubernetes cluster in preprod namespace (Replace with actual command)"
+
+  deploy-prod:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Docker image for production
+        run: echo "Build Docker image for prod (Replace with actual command)"
+
+      - name: Push to ECR
+        run: echo "Push Docker image to ECR for prod (Replace with actual command)"
+
+      - name: Deploy to Kubernetes cluster
+        run: echo "Deploy to Kubernetes cluster in prod namespace (Replace with actual command)"
