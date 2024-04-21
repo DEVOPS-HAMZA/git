@@ -14,4 +14,4 @@ jobs:
       - name: Lint Code
         run: echo "Running linters for all branches"
       - name: Run Tests
-        run: echo "Running tests for all branches"
+        run: echo "Running tests for al l branches"
