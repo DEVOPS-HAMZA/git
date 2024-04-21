@@ -1,12 +1,18 @@
 name: CI/CD Pipeline
 
 on:
+  create:  # Triggered when a branch or tag is created
   push:
     branches:
       - '*'
       - '!master'
       - '!release/**'
       - '!feature/**'
+  pull_request:
+    branches:
+      - develop
+      - master
+      - 'release/**'
   workflow_dispatch:
     inputs:
       environment:
@@ -26,6 +32,7 @@ jobs:
 
   build-and-push-image:
     needs: lint-and-test
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release/') || github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
