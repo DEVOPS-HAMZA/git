@@ -16,6 +16,21 @@ git push origin develop --force
 git checkout develop
 
 git pull origin develop
+<<<<<<< HEAD
+=======
+
+git checkout -b feature/FA-40-unknown-activity-display-transactions-logic
+
+git push -u origin feature/FA-40-unknown-activity-display-transactions-logic
+
+git branch --show-current
+===========
+git checkout develop
+git pull origin develop
+git merge feature/FA-81-Create-custom-component-search
+
+
+>>>>>>> develop
 
 git checkout -b feature/FA-40-unknown-activity-display-transactions-logic
 

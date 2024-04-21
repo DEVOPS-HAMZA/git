@@ -1,1 +1,8 @@
+<<<<<<< HEAD
 ./cmd.sh
+=======
+/logs/
+./cmd.sh
+config.env
+*.tmp
+>>>>>>> develop
