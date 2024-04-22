@@ -1,69 +1,67 @@
-name: Continuous Integration and Continuous Deployment
+name: CI/CD Workflow
 
 on:
   push:
-    branches-ignore:
-      - master
-      - release/**
-  pull_request:
     branches:
+      - 'feature/**'
       - develop
-  workflow_dispatch:
-    inputs:
-      deploy_prod:
-        description: 'Set to true to deploy to production'
-        required: true
-        default: 'false'
+      - staging
+      - master
 
 jobs:
   lint-and-test:
     name: Lint and Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      
       - name: Lint Code
-        run: echo "Linting the code..."
+        if: startsWith(github.ref, 'refs/heads/feature/')
+        run: echo "Linting the code on feature branch"
+      
       - name: Run Tests
-        run: echo "Running tests..."
-
-  lint-feature-branches:
-    name: Lint Feature Branches
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/heads/feature/')
-    steps:
-      - uses: actions/checkout@v2
-      - name: Lint Code
-        run: echo "Linting the code..."
-
-  build-and-deploy-dev:
-    name: Build and Deploy to Development
+        if: startsWith(github.ref, 'refs/heads/feature/')
+        run: echo "Running tests on feature branch"
+  
+  build-and-push:
+    name: Build and Push Docker image
     runs-on: ubuntu-latest
     needs: lint-and-test
-    if: github.ref == 'refs/heads/develop' && github.event_name == 'push' || github.event_name == 'pull_request' && github.base_ref == 'refs/heads/develop'
+    if: |
+      github.ref == 'refs/heads/develop' || 
+      github.ref == 'refs/heads/staging' || 
+      github.ref == 'refs/heads/master'
     steps:
-      - uses: actions/checkout@v2
-      - name: Build Docker Image
-        run: echo "Building Docker image for development..."
-      - name: Deploy to Dev Environment
-        run: echo "Deploying to development environment..."
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      
+      - name: Simulate Building Docker image
+        run: echo "Building Docker image for ${GITHUB_REF#refs/heads/}"
 
-  build-and-deploy-staging:
-    name: Build and Deploy to Staging
-    runs-on: ubuntu-latest
-    needs: lint-and-test
-    if: startsWith(github.ref, 'refs/heads/release/') && github.event_name == 'push'
-    steps:
-      - uses: actions/checkout@v2
-      - name: Build Docker Image for Staging
-        run: echo "Building Docker image for staging..."
-      - name: Deploy to Staging Environment
-        run: echo "Deploying to staging environment..."
+      - name: Simulate Pushing Docker image to Registry
+        run: echo "Pushing Docker image to registry for ${GITHUB_REF#refs/heads/}"
 
-  deploy-prod:
-    name: Deploy to Production
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_prod == 'true'
+    needs: build-and-push
+    if: |
+      github.ref == 'refs/heads/develop' ||
+      github.ref == 'refs/heads/staging' || 
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master')
     steps:
-      - uses: actions/checkout@v2
-      - name: Deploy to Production Environment
-        run: echo "Deploying to production environment..."
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      
+      - name: Simulate Deploy to Development Environment
+        if: github.ref == 'refs/heads/develop'
+        run: echo "Deploying to development environment"
+      
+      - name: Simulate Deploy to Staging Environment
+        if: github.ref == 'refs/heads/staging'
+        run: echo "Deploying to staging environment"
+      
+      - name: Simulate Manual Deploy to Production Environment
+        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master'
+        run: echo "Deploying to production environment"
