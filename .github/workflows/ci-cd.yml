@@ -7,61 +7,55 @@ on:
       - develop
       - staging
       - master
+  pull_request:
+    branches:
+      - develop
+  workflow_dispatch:
+    inputs:
+      deploy_prod:
+        description: 'Set to true to deploy to production'
+        required: true
+        default: 'false'
 
 jobs:
   lint-and-test:
     name: Lint and Test
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v2
-      
+      - uses: actions/checkout@v2
       - name: Lint Code
-        if: startsWith(github.ref, 'refs/heads/feature/')
-        run: echo "Linting the code on feature branch"
-      
+        run: echo "Linting the code..."
       - name: Run Tests
-        if: startsWith(github.ref, 'refs/heads/feature/')
-        run: echo "Running tests on feature branch"
-  
-  build-and-push:
-    name: Build and Push Docker image
+        run: echo "Running tests..."
+
+  build-and-deploy:
+    name: Build and Deploy
     runs-on: ubuntu-latest
     needs: lint-and-test
     if: |
       github.ref == 'refs/heads/develop' || 
       github.ref == 'refs/heads/staging' || 
-      github.ref == 'refs/heads/master'
+      github.ref == 'refs/heads/master' ||
+      github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_prod == 'true'
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v2
-      
+      - uses: actions/checkout@v2
       - name: Simulate Building Docker image
         run: echo "Building Docker image for ${GITHUB_REF#refs/heads/}"
-
       - name: Simulate Pushing Docker image to Registry
         run: echo "Pushing Docker image to registry for ${GITHUB_REF#refs/heads/}"
-
-  deploy:
-    name: Deploy
-    runs-on: ubuntu-latest
-    needs: build-and-push
-    if: |
-      github.ref == 'refs/heads/develop' ||
-      github.ref == 'refs/heads/staging' || 
-      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master')
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v2
-      
-      - name: Simulate Deploy to Development Environment
-        if: github.ref == 'refs/heads/develop'
-        run: echo "Deploying to development environment"
-      
-      - name: Simulate Deploy to Staging Environment
-        if: github.ref == 'refs/heads/staging'
-        run: echo "Deploying to staging environment"
-      
-      - name: Simulate Manual Deploy to Production Environment
-        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master'
-        run: echo "Deploying to production environment"
+      - name: Simulate Deploy
+        if: |
+          github.ref == 'refs/heads/develop' ||
+          github.ref == 'refs/heads/staging' ||
+          github.ref == 'refs/heads/master' ||
+          github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_prod == 'true'
+        run: |
+          if [ "${GITHUB_REF#refs/heads/}" = "develop" ]; then
+            echo "Deploying to development environment"
+          elif [ "${GITHUB_REF#refs/heads/}" = "staging" ]; then
+            echo "Deploying to staging environment"
+          elif [ "${GITHUB_REF#refs/heads/}" = "master" ]; then
+            echo "Automatically deploying to production environment"
+          elif [ "${{ github.event.inputs.deploy_prod }}" = "true" ]; then
+            echo "Manually deploying to production environment"
+          fi
