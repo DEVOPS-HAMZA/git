@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+edit master
+=======
 name: CI/CD Workflow
 
 on:
@@ -82,3 +85,5 @@ jobs:
 
       - name: Deploy to Kubernetes cluster
         run: echo "Deploy to Kubernetes cluster in prod namespace (Replace with actual command)"
+>>>>>>> develop
+to do
